@@ -4,7 +4,7 @@ navbar:
   title: "VersionControl"
   left:
     - text: "Home"
-      href: index.html
+      href: Git_and_R.html
     - text: "Git and R in Soil Ecology"
       href: Git_and_R.html
 output:
