@@ -1,0 +1,12 @@
+name: "VersionControl"
+output_dir: "docs"
+navbar:
+title: "VersionControl"
+left:
+- text: "Home"
+href: index.html
+# - text: "Git and R in Soil Ecology"
+# href: Git_and_R.html
+output:
+html_document:
+theme: cosmo
