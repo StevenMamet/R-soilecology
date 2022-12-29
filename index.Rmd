@@ -1,0 +1,5 @@
+---
+title: "Git and R in Soil Ecology"
+---
+
+This is a resource for those who need R and stats help, but need a little demystifying of coding and version control. 

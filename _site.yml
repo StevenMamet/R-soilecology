@@ -1,11 +1,11 @@
-name: "VersionControl"
+name: "Soil-Science-with-R"
 output_dir: "docs"
 navbar:
-  title: "VersionControl"
+  title: "Soil Science with R"
   left:
     - text: "Home"
       href: index.html
-    - text: "Git and R in Soil Ecology"
+    - text: "Git and R"
       href: Git_and_R.html
 output:
   html_document:
