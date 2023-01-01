@@ -1,5 +1,5 @@
 ---
-title: "Git and R in Soil Ecology"
+title: "Git and R in Soil Science"
 ---
 
 ```{r setup, include=FALSE}
@@ -60,3 +60,25 @@ Open RStudio on your local environment.
 Click `File`, `New Project`, `Version Control`, `Git`.  
 Paste the repository URL and enter TAB to move to the `Project directory` name field.  
 Click `Create Project`.
+
+## Working with local files and pushing to the remote location on GitHub
+
+You may need to restart R and open the project to see the changes. Now you're ready to code with version control. If you make any changes to your code/files, you should see those changes relfected under the `git` tab.
+
+<img src="images/taskbar.png" style="width:50%">
+
+Here I've opened up the `git` tab and clicked on the `commit` button.
+
+<img src="images/git_commit.png" style="width:50%">
+
+Here you can preview any changes (additions are <span style="color: green;">green</span>, deletions are <span style="color: red;">red</span>). 
+
+You can select which files you would like to commit the changes to (top left) and add any comments that would be helpful to your future self, or any collaborators. For instance, if you added code to run a linear regression analysis you might write something like, "Added glm of SOC vs N to 'soil_nutrient_analysis.R'". These comments are crucial for helping you to make sense of changes you've made through time.
+
+These changes are stored on your local machine. Once you're ready to upload them to your GitHub remote for others to see, you can push the changes by pushing the `push` button. Now others that you've shared your repository with could see those changes online.
+
+If you or someone else has made changes remotely and you'd like to incorporate those changes into your workflow locally, you can use the `pull` button to sync the remote repository with your local one on your computer.
+
+There is so much more to Git, GitHub, and R Studio, but these are the basics: commit, push, and pull.
+
+Now you're ready to code and collaborate with others!

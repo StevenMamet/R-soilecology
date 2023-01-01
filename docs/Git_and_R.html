@@ -11,7 +11,7 @@
 
 
 
-<title>Git and R in Soil Ecology</title>
+<title>Git and R in Soil Science</title>
 
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -260,7 +260,7 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Git and R in Soil Ecology</h1>
+<h1 class="title toc-ignore">Git and R in Soil Science</h1>
 
 </div>
 
@@ -343,6 +343,40 @@ Click <code>File</code>, <code>New Project</code>,
 Paste the repository URL and enter TAB to move to the
 <code>Project directory</code> name field.<br />
 Click <code>Create Project</code>.</p>
+</div>
+<div
+id="working-with-local-files-and-pushing-to-the-remote-location-on-github"
+class="section level2">
+<h2>Working with local files and pushing to the remote location on
+GitHub</h2>
+<p>You may need to restart R and open the project to see the changes.
+Now you’re ready to code with version control. If you make any changes
+to your code/files, you should see those changes relfected under the
+<code>git</code> tab.</p>
+<p><img src="images/taskbar.png" style="width:50%"></p>
+<p>Here I’ve opened up the <code>git</code> tab and clicked on the
+<code>commit</code> button.</p>
+<p><img src="images/git_commit.png" style="width:50%"></p>
+<p>Here you can preview any changes (additions are <span
+style="color: green;">green</span>, deletions are <span
+style="color: red;">red</span>).</p>
+<p>You can select which files you would like to commit the changes to
+(top left) and add any comments that would be helpful to your future
+self, or any collaborators. For instance, if you added code to run a
+linear regression analysis you might write something like, “Added glm of
+SOC vs N to ‘soil_nutrient_analysis.R’”. These comments are crucial for
+helping you to make sense of changes you’ve made through time.</p>
+<p>These changes are stored on your local machine. Once you’re ready to
+upload them to your GitHub remote for others to see, you can push the
+changes by pushing the <code>push</code> button. Now others that you’ve
+shared your repository with could see those changes online.</p>
+<p>If you or someone else has made changes remotely and you’d like to
+incorporate those changes into your workflow locally, you can use the
+<code>pull</code> button to sync the remote repository with your local
+one on your computer.</p>
+<p>There is so much more to Git, GitHub, and R Studio, but these are the
+basics: commit, push, and pull.</p>
+<p>Now you’re ready to code and collaborate with others!</p>
 </div>
 </div>
 
