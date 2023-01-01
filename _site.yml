@@ -9,4 +9,4 @@ navbar:
       href: Git_and_R.html
 output:
   html_document:
-    theme: cosmo
+    theme: dark-poole
