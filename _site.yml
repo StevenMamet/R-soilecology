@@ -9,6 +9,8 @@ navbar:
       href: Git_and_R.html
     - text: "Read and Write in R"
       href: Read_and_Write.html
+    - text: "Tidyverse"
+      href: Data_frames_w_tidyverse.html
 output:
   html_document:
     theme: darkly

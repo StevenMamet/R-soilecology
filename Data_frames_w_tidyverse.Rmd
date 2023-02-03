@@ -1,0 +1,854 @@
+---
+title: "Data Frames with the Tidyverse"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(kableExtra)
+library(flextable)
+library(ftExtra)
+```
+
+Here are some good background sources to consult:
+[R for Data Science](https://r4ds.had.co.nz/tibbles)
+[Tidyverse Skills for Data Science](https://jhudatascience.org/tidyversecourse/wrangle-data.html#data-wrangling)
+[dplyr cheat sheet from RStudio](http://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+
+# Acknowledgements
+Material for this page was borrowed and adopted from:
+
+<https://rdpeng.github.io/Biostat776/lecture-managing-data-frames-with-the-tidyverse>
+<https://jhudatascience.org/tidyversecourse/get-data.html#tibbles>
+<https://www.stephaniehicks.com/jhustatcomputing2022/posts/2022-09-06-managing-data-frames-with-tidyverse/>
+
+# Data Frames  
+
+The data frame (or `data.frame`) is a key data structure in statistics and in `R`.  
+
+The basic structure of a data frame is that there is one observation per row and each column represents a variable, a measure, feature, or characteristic of that observation.  
+
+`R` has an internal implementation of data frames that is likely the one you will use most often. However, there are packages on CRAN that implement data frames via things like relational databases that allow you to operate on very, very large data frames (but we will not discuss them here).  
+
+Given the importance of managing data frames, it is important that we have good tools for dealing with them.  
+
+For example, operations like filtering rows, re-ordering rows, and selecting columns, can often be tedious operations in `R` whose syntax is not very intuitive. The `dplyr` package is designed to mitigate a lot of these problems and to provide a highly optimized set of routines specifically for dealing with data frames.  
+
+# Tibbles  
+
+Another type of data structure that we need to discuss is called the tibble! It’s best to think of tibbles as an updated and stylish version of the `data.frame`.  
+
+Tibbles are what `tidyverse` packages work with most seamlessly. Now, that does not mean `tidyverse` packages require tibbles.  
+
+In fact, they still work with data.frames, but the more you work with `tidyverse` and `tidyverse`-adjacent packages, the more you will see the advantages of using tibbles.  
+
+Before we go any further, tibbles are data frames, but they have some new bells and whistles to make your life easier.  
+
+How tibbles differ from `data.frame`
+There are a number of differences between tibbles and data.frames.
+
+## Note  
+To see a full vignette about tibbles and how they differ from `data.frame`, you will want to execute `vignette("tibble")` and read through that vignette.
+
+To summarize some of the most important points:  
+
+* Input type remains unchanged - `data.frame` is notorious for treating strings as factors; this will not happen with tibbles.  
+* Variable names remain unchanged - In base R, creating data.frames will remove spaces from names, converting them to periods or add “x” before numeric column names. Creating tibbles will not change variable (column) names.  
+* There are no `row.names()` for a tibble - Tidy data requires that variables be stored in a consistent way, removing the need for row names.  
+* Tibbles print first ten rows and columns that fit on one screen - Printing a tibble to screen will never print the entire huge data frame out. By default, it just shows what fits to your screen.  
+
+# Creating a tibble  
+
+The `tibble` package is part of the `tidyverse` and can thus be loaded in (once installed) using:
+
+`library(tidyverse)`
+
+## as_tibble()  
+
+Since many packages use the historical `data.frame` from base `R`, you will often find yourself in the situation that you have a `data.frame` and want to convert that `data.frame` to a tibble.  
+
+To do so, the `as_tibble()` function is exactly what you are looking for.  
+
+For the example, here we use a dataset (`chicago.rds`) containing air pollution and temperature data for the city of Chicago in the U.S.  
+
+The dataset is available in the [here](http://www.biostat.jhsph.edu/~rpeng/leanpub/rprog/chicago_data.zip). Once unzipped, you can load the data into `R` using the `readRDS()` function.  
+
+`library(here)`
+
+`chicago <- readRDS(here("data", "chicago.rds"))`
+
+You can see some basic characteristics of the dataset with the `dim()` and `str()` functions.
+
+`dim(chicago)`
+
+    [1] 6940    8
+    
+`str(chicago)`
+    
+    'data.frame':   6940 obs. of  8 variables:
+     $ city      : chr  "chic" "chic" "chic" "chic" ...
+     $ tmpd      : num  31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+     $ dptp      : num  31.5 29.9 27.4 28.6 28.9 ...
+     $ date      : Date, format: "1987-01-01" "1987-01-02" ...
+     $ pm25tmean2: num  NA NA NA NA NA NA NA NA NA NA ...
+     $ pm10tmean2: num  34 NA 34.2 47 NA ...
+     $ o3tmean2  : num  4.25 3.3 3.33 4.38 4.75 ...
+     $ no2tmean2 : num  20 23.2 23.8 30.4 30.3 ...
+
+We see this data structure is a `data.frame` with 6940 observations and 8 variables.
+
+To convert this `data.frame` to a tibble you would use the following:
+
+`str(as_tibble(chicago))`
+
+    tibble [6,940 × 8] (S3: tbl_df/tbl/data.frame)
+     $ city      : chr [1:6940] "chic" "chic" "chic" "chic" ...
+     $ tmpd      : num [1:6940] 31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+     $ dptp      : num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+     $ date      : Date[1:6940], format: "1987-01-01" "1987-01-02" ...
+     $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+     $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+     $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+     $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...
+
+## Note  
+Tibbles, by default, only print the first ten rows to screen.
+
+If you were to print the `data.frame` chicago to screen, all 6940 rows would be displayed. When working with large data.frames, this default behavior can be incredibly frustrating.
+
+Using tibbles removes this frustration because of the default settings for tibble printing.
+
+Additionally, you will note that the type of the variable is printed for each variable in the tibble. This helpful feature is another added bonus of tibbles relative to `data.frame`.
+
+### Want to see more of the tibble?  
+
+If you do want to see more rows from the tibble, there are a few options!  
+
+1. The `View()` function in RStudio is incredibly helpful. The input to this function is the `data.frame` or tibble you would like to see. Specifically, `View(chicago)` would provide you, the viewer, with a scrollable view (in a new tab) of the complete dataset.  
+
+2. Use the fact that `print()` enables you to specify how many rows and columns you would like to display.
+Here, we again display the chicago `data.frame` as a tibble but specify that we would only like to see 5 rows. The `width = Inf` argument specifies that we would like to see all the possible columns. Here, there are only 8, but for larger datasets, this can be helpful to specify.  
+
+``
+as_tibble(chicago) %>% 
+  print(n = 5, width = Inf)
+``
+
+    # A tibble: 6,940 × 8
+      city   tmpd  dptp date       pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+      <chr> <dbl> <dbl> <date>          <dbl>      <dbl>    <dbl>     <dbl>
+    1 chic   31.5  31.5 1987-01-01         NA       34       4.25      20.0
+    2 chic   33    29.9 1987-01-02         NA       NA       3.30      23.2
+    3 chic   33    27.4 1987-01-03         NA       34.2     3.33      23.8
+    4 chic   29    28.6 1987-01-04         NA       47       4.38      30.4
+    5 chic   32    28.9 1987-01-05         NA       NA       4.75      30.3
+    # … with 6,935 more rows
+
+## tibble()  
+
+Alternatively, you can create a tibble on the fly by using `tibble()` and specifying the information you would like stored in each column.  
+
+## Note  
+If you provide a single value, this value will be repeated across all rows of the tibble. This is referred to as “recycling inputs of length 1.”
+
+In the example here, we see that the column `c` will contain the value '1' across all rows.
+
+``````
+tibble(
+  a = 1:5,
+  b = 6:10,
+  c = 1,
+  z = (a + b)^2 + c
+)
+``````
+
+    # A tibble: 5 × 4
+          a     b     c     z
+      <int> <int> <dbl> <dbl>
+    1     1     6     1    50
+    2     2     7     1    82
+    3     3     8     1   122
+    4     4     9     1   170
+    5     5    10     1   226
+
+The `tibble()` function allows you to quickly generate tibbles and even allows you to reference columns within the tibble you are creating, as seen in column z of the example above.  
+
+## Note  
+Tibbles can have column names that are not allowed in `data.frame`.
+
+In the example below, we see that to utilize a nontraditional variable name, you surround the column name with backticks.
+
+Note that to refer to such columns in other tidyverse packages, you willl continue to use backticks surrounding the variable name.
+
+`````
+tibble(
+  `two words` = 1:5,
+  `12` = "numeric",
+  `:)` = "smile",
+)
+`````
+
+    # A tibble: 5 × 3
+      `two words` `12`    `:)` 
+            <int> <chr>   <chr>
+    1           1 numeric smile
+    2           2 numeric smile
+    3           3 numeric smile
+    4           4 numeric smile
+    5           5 numeric smile
+
+# Subsetting tibbles  
+
+Subsetting tibbles also differs slightly from how subsetting occurs with `data.frame`.
+
+When it comes to tibbles,
+
+* `[[` can subset by name or position  
+* `$` only subsets by name  
+
+For example:
+
+``````
+df <- tibble(
+  a = 1:5,
+  b = 6:10,
+  c = 1,
+  z = (a + b)^2 + c
+)
+``````
+
+Extract by name using `$` or `[[]]`
+`df$z`
+
+    [1]  50  82 122 170 226
+
+`df[["z"]]`
+
+    [1]  50  82 122 170 226
+    
+Extract by position requires `[[]]`  
+`df[[4]]`  
+
+    [1]  50  82 122 170 226
+
+Having now discussed tibbles, which are the type of object most `tidyverse` and `tidyverse`-adjacent packages work best with, we now know the goal.  
+
+In many cases, tibbles are ultimately what we want to work with in `R`.  
+
+However, data are stored in many different formats outside of `R`. We will spend the rest of this lesson discussing wrangling functions that work either a `data.frame` or `tibble.`  
+
+# The dplyr Package  
+
+The `dplyr` package was developed by Posit (formely RStudio) and is an optimized and distilled version of the older `plyr` package for data manipulation or wrangling.  
+
+The `dplyr` package does not provide any "new" functionality to `R` per se, in the sense that everything `dplyr` does could already be done with base `R`, but it greatly simplifies existing functionality in `R`.  
+
+One important contribution of the `dplyr` package is that it provides a "grammar" (in particular, verbs) for data manipulation and for operating on data frames.  
+
+With this grammar, you can sensibly communicate what it is that you are doing to a data frame that other people can understand (assuming they also know the grammar). This is useful because it provides an abstraction for data manipulation that previously did not exist.  
+
+Another useful contribution is that the `dplyr` functions are very fast, as many key operations are coded in C++. Quickly, C++ is a high-level general-purpose programming language created by Danish computer scientist Bjarne Stroustrup as an extension of the C programming language, or "C with Classes". Check out the [Wikipedia article](https://en.wikipedia.org/wiki/C%2B%2B) if you're interested in learning more.  
+
+## `dplyr` grammar  
+
+Some of the key "verbs" provided by the `dplyr` package are:
+
+* `select()`: returns a subset of the columns of a data frame, using a flexible notation
+* `filter()`: extracts a subset of rows from a data frame based on logical conditions
+* `arrange()`: reorders rows of a data frame
+* `rename()`: renames variables in a data frame
+* `mutate()`: adds new variables/columns or transform existing variables
+* `summarise()` / `summarize()`: generate summary statistics of different variables in the data frame, possibly within strata
+* `%>%`: the `pipe` operator is used to connect multiple verb actions together into a pipeline
+
+## Note  
+
+The `dplyr` package as a number of its own data types that it takes advantage of.
+
+For example, there is a handy `print()` method that prevents you from printing a lot of data to the console. Most of the time, these additional data types are transparent to the user and do not need to be worried about.  
+
+## `dplyr` functions  
+
+All of the functions that we will discuss here will have a few common characteristics. In particular:
+
+1. The first argument is a data frame type object.  
+2. The subsequent arguments describe what to do with the data frame specified in the first argument, and you can refer to columns in the data frame directly (without using the `$` operator, just use the column names).  
+3. The return result of a function is a new data frame.  
+4. Data frames must be properly formatted and annotated for this to all be useful. In particular, the data must be `tidy.` In short, there should be one observation per row, and each column should represent a feature or characteristic of that observation.  
+
+## dplyr installation  
+
+The `dplyr` package can be installed from CRAN or from GitHub using the `devtools` package and the `install_github()` function. The GitHub repository will usually contain the latest updates to the package and the development version.  
+
+To install from CRAN, just run:
+
+`install.packages("dplyr")`
+
+The `dplyr` package is also installed when you install the `tidyverse` meta-package.  
+
+After installing the package it is important that you load it into your R session with the `library()` function.  
+
+`library(dplyr)`
+
+You may get some warnings when the package is loaded because there are functions in the `dplyr` package that have the same name as functions in other packages. For now you can ignore the warnings.
+
+## select()  
+
+We will continue to use the chicago dataset containing air pollution and temperature data.  
+
+``
+chicago <- as_tibble(chicago)
+str(chicago)
+``
+
+    tibble [6,940 × 8] (S3: tbl_df/tbl/data.frame)
+     $ city      : chr [1:6940] "chic" "chic" "chic" "chic" ...
+     $ tmpd      : num [1:6940] 31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+     $ dptp      : num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+     $ date      : Date[1:6940], format: "1987-01-01" "1987-01-02" ...
+     $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+     $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+     $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+     $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...
+The `select()` function can be used to select columns of a data frame that you want to focus on.  
+
+## Example  
+
+Suppose we wanted to take the first 3 columns only. There are a few ways to do this.
+
+1. We could for example use numerical indices:
+
+`names(chicago)[1:3]`
+
+    [1] "city" "tmpd" "dptp"
+
+2. But we can also use the names directly:
+
+``
+subset <- select(chicago, city:dptp)
+head(subset)
+``
+
+    # A tibble: 6 × 3
+      city   tmpd  dptp
+      <chr> <dbl> <dbl>
+    1 chic   31.5  31.5
+    2 chic   33    29.9
+    3 chic   33    27.4
+    4 chic   29    28.6
+    5 chic   32    28.9
+    6 chic   40    35.1
+
+## Note  
+The `:` normally cannot be used with names or strings, but inside the `select()` function you can use it to specify a range of variable names.  
+
+You can also omit variables using the `select()` function by using the negative sign. With `select()` you can do:
+
+`select(chicago, -(city:dptp))`
+
+Alternatively, here is the same function but using the pipe notation:
+
+`chicago %>% select(-(city:dptp))`
+
+Both indicate we should include every variable except the variables `city` through `dptp.` The equivalent code in base `R` would be:
+
+```
+i <- match("city", names(chicago))
+j <- match("dptp", names(chicago))
+head(chicago[, -(i:j)])
+```
+
+Not super intuitive, right?
+
+The `select()` function also allows a special syntax that allows you to specify variable names based on patterns. So, for example, if you wanted to keep every variable that ends with a "2", we could do:  
+
+``
+subset <- select(chicago, ends_with("2"))
+str(subset)
+``
+
+    tibble [6,940 × 4] (S3: tbl_df/tbl/data.frame)
+     $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+     $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+     $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+     $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...
+
+Or if we wanted to keep every variable that starts with a "d", we could do:
+
+``
+subset <- select(chicago, starts_with("d"))
+str(subset)
+``
+
+    tibble [6,940 × 2] (S3: tbl_df/tbl/data.frame)
+     $ dptp: num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+     $ date: Date[1:6940], format: "1987-01-01" "1987-01-02" ...
+
+You can also use more general regular expressions if necessary. See the help page (`?select`) for more details.  
+
+## filter()  
+
+The `filter()` function is used to extract subsets of rows from a data frame. This function is similar to the existing `subset()` function in R but is quite a bit faster in my experience.  
+
+## Example  
+
+Suppose we wanted to extract the rows of the chicago data frame where the levels of PM2.5 are greater than 30 (which is a reasonably high level), we could do:
+
+``
+chic.f <- filter(chicago, pm25tmean2 > 30)
+str(chic.f)
+``
+
+    tibble [194 × 8] (S3: tbl_df/tbl/data.frame)
+     $ city      : chr [1:194] "chic" "chic" "chic" "chic" ...
+     $ tmpd      : num [1:194] 23 28 55 59 57 57 75 61 73 78 ...
+     $ dptp      : num [1:194] 21.9 25.8 51.3 53.7 52 56 65.8 59 60.3 67.1 ...
+     $ date      : Date[1:194], format: "1998-01-17" "1998-01-23" ...
+     $ pm25tmean2: num [1:194] 38.1 34 39.4 35.4 33.3 ...
+     $ pm10tmean2: num [1:194] 32.5 38.7 34 28.5 35 ...
+     $ o3tmean2  : num [1:194] 3.18 1.75 10.79 14.3 20.66 ...
+     $ no2tmean2 : num [1:194] 25.3 29.4 25.3 31.4 26.8 ...
+
+You can see that there are now only 194 rows in the data frame and the distribution of the pm25tmean2 values is.
+
+`summary(chic.f$pm25tmean2)`
+
+      Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+     30.05   32.12   35.04   36.63   39.53   61.50 
+
+We can place an arbitrarily complex logical sequence inside of `filter()`, so we could for example extract the rows where PM2.5 is greater than 30 and temperature is greater than 80 degrees Fahrenheit.
+
+``
+chic.f <- filter(chicago, pm25tmean2 > 30 & tmpd > 80)
+select(chic.f, date, tmpd, pm25tmean2)
+``
+
+    # A tibble: 17 × 3
+       date        tmpd pm25tmean2
+       <date>     <dbl>      <dbl>
+     1 1998-08-23    81       39.6
+     2 1998-09-06    81       31.5
+     3 2001-07-20    82       32.3
+     4 2001-08-01    84       43.7
+     5 2001-08-08    85       38.8
+     6 2001-08-09    84       38.2
+     7 2002-06-20    82       33  
+     8 2002-06-23    82       42.5
+     9 2002-07-08    81       33.1
+    10 2002-07-18    82       38.8
+    11 2003-06-25    82       33.9
+    12 2003-07-04    84       32.9
+    13 2005-06-24    86       31.9
+    14 2005-06-27    82       51.5
+    15 2005-06-28    85       31.2
+    16 2005-07-17    84       32.7
+    17 2005-08-03    84       37.9
+
+Now there are only 17 observations where both of those conditions are met.
+
+Other logical operators you should be aware of include:
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+# set_flextable_defaults(
+#   font.size = 10, padding = 3)
+df1 <- data.frame(Operator = c("==","!=",">",">=","<","<=","%in%","is.na()"),
+                  Meaning = c("Equals","Is not equal to","Greater than","Greater than or equal to","Less than","Less than or equal to","Included in","Is a missing value"),
+                  Example = c("city == chic","city != chic","tmpd > 32.0","tmpd >= 32.0","tmpd < 32.0","tmpd <= 32.0","city %in% c('chic', 'bmore')","is.na(pm10tmean2)"))
+ft1 <- qflextable(df1) %>% 
+  hline_bottom() %>% 
+  color(color = "white", part = "all")
+ft1
+```
+
+
+## Note  
+If you are ever unsure of how to write a logical statement, but know how to write its opposite, you can use the `!` operator to negate the whole statement.  
+
+A common use of this is to identify observations with non-missing data (e.g., `!(is.na(pm10tmean2))`).  
+
+## arrange()  
+
+The `arrange()` function is used to reorder rows of a data frame according to one of the variables/columns. Reordering rows of a data frame (while preserving corresponding order of other columns) is normally a pain to do in `R`. The `arrange()` function simplifies the process quite a bit.  
+
+Here we can order the rows of the data frame by date, so that the first row is the earliest (oldest) observation and the last row is the latest (most recent) observation.    
+
+`chicago <- arrange(chicago, date)`
+
+We can now check the first few rows:  
+
+`head(select(chicago, date, pm25tmean2), 3)`
+
+    # A tibble: 3 × 2
+      date       pm25tmean2
+      <date>          <dbl>
+    1 1987-01-01         NA
+    2 1987-01-02         NA
+    3 1987-01-03         NA
+
+and the last few rows:
+
+`tail(select(chicago, date, pm25tmean2), 3)`
+
+    # A tibble: 3 × 2
+      date       pm25tmean2
+      <date>          <dbl>
+    1 2005-12-29       7.45
+    2 2005-12-30      15.1 
+    3 2005-12-31      15   
+
+Columns can be arranged in descending order too by using the special `desc()` operator:  
+
+`chicago <- arrange(chicago, desc(date))`
+
+Looking at the first three and last three rows shows the dates in descending order.
+
+`head(select(chicago, date, pm25tmean2), 3)`
+
+    # A tibble: 3 × 2
+      date       pm25tmean2
+      <date>          <dbl>
+    1 2005-12-31      15   
+    2 2005-12-30      15.1 
+    3 2005-12-29       7.45
+
+`tail(select(chicago, date, pm25tmean2), 3)`
+
+    # A tibble: 3 × 2
+      date       pm25tmean2
+      <date>          <dbl>
+    1 1987-01-03         NA
+    2 1987-01-02         NA
+    3 1987-01-01         NA
+
+## rename()  
+
+Renaming a variable in a data frame in R is surprisingly hard to do! The `rename()` function is designed to make this process easier.  
+
+Here you can see the names of the first five variables in the chicago data frame.  
+
+`head(chicago[, 1:5], 3)`
+
+    # A tibble: 3 × 5
+      city   tmpd  dptp date       pm25tmean2
+      <chr> <dbl> <dbl> <date>          <dbl>
+    1 chic     35  30.1 2005-12-31      15   
+    2 chic     36  31   2005-12-30      15.1 
+    3 chic     35  29.4 2005-12-29       7.45
+
+The dptp column is supposed to represent the dew point temperature and the pm25tmean2 column provides the PM2.5 data.  
+
+However, these names are pretty obscure or awkward and probably be renamed to something more sensible.  
+
+``
+chicago <- rename(chicago, dewpoint = dptp, pm25 = pm25tmean2)
+head(chicago[, 1:5], 3)
+``
+
+    # A tibble: 3 × 5
+      city   tmpd dewpoint date        pm25
+      <chr> <dbl>    <dbl> <date>     <dbl>
+    1 chic     35     30.1 2005-12-31 15   
+    2 chic     36     31   2005-12-30 15.1 
+    3 chic     35     29.4 2005-12-29  7.45
+
+The syntax inside the `rename()` function is to have the new name on the left-hand side of the `=` sign and the old name on the right-hand side.  
+
+## mutate()  
+
+The `mutate()` function exists to compute transformations of variables in a data frame. Often, you want to create new variables that are derived from existing variables and `mutate()` provides a clean interface for doing that.  
+
+For example, with air pollution data, we often want to detrend the data by subtracting the mean from the data.  
+
+That way we can look at whether a given day’s air pollution level is higher than or less than average (as opposed to looking at its absolute level).  
+
+Here, we create a pm25detrend variable that subtracts the mean from the pm25 variable.  
+
+``
+chicago <- mutate(chicago, pm25detrend = pm25 - mean(pm25, na.rm = TRUE))
+head(chicago)
+``
+
+    # A tibble: 6 × 9
+      city   tmpd dewpoint date        pm25 pm10tmean2 o3tmean2 no2tmean2 pm25detr…¹
+      <chr> <dbl>    <dbl> <date>     <dbl>      <dbl>    <dbl>     <dbl>      <dbl>
+    1 chic     35     30.1 2005-12-31 15          23.5     2.53      13.2      -1.23
+    2 chic     36     31   2005-12-30 15.1        19.2     3.03      22.8      -1.17
+    3 chic     35     29.4 2005-12-29  7.45       23.5     6.79      20.0      -8.78
+    4 chic     37     34.5 2005-12-28 17.8        27.5     3.26      19.3       1.52
+    5 chic     40     33.6 2005-12-27 23.6        27       4.47      23.5       7.33
+    6 chic     35     29.6 2005-12-26  8.4         8.5    14.0       16.8      -7.83
+    # … with abbreviated variable name ¹​pm25detrend
+
+There is also the related `transmute()` function, which does the same thing as mutate() but then drops all non-transformed variables.  
+
+Here, we de-trend the PM10 and ozone (O3) variables.  
+
+```
+head(transmute(chicago, 
+               pm10detrend = pm10tmean2 - mean(pm10tmean2, na.rm = TRUE),
+               o3detrend = o3tmean2 - mean(o3tmean2, na.rm = TRUE)))
+```
+
+    # A tibble: 6 × 2
+      pm10detrend o3detrend
+            <dbl>     <dbl>
+    1      -10.4     -16.9 
+    2      -14.7     -16.4 
+    3      -10.4     -12.6 
+    4       -6.40    -16.2 
+    5       -6.90    -15.0 
+    6      -25.4      -5.39
+
+Note that there are only two columns in the transmuted data frame.  
+
+## group_by()  
+
+The `group_by()` function is used to generate summary statistics from the data frame within strata defined by a variable.  
+
+For example, in this air pollution dataset, you might want to know what the average annual level of PM2.5 is?  
+
+So the stratum is the year, and that is something we can derive from the date variable.  
+
+In conjunction with the `group_by()` function, we often use the `summarize()` function (or `summarise()` for some parts of the world).  
+
+## Note  
+The general operation here is a combination of:  
+
+1. Splitting a data frame into separate pieces defined by a variable or group of variables (`group_by()`).
+2. Then, applying a summary function across those subsets (`summarize()`)  
+
+## Example  
+
+First, we can create a year variable using `as.POSIXlt()`:  
+
+`chicago <- mutate(chicago, year = as.POSIXlt(date)$year + 1900)`  
+
+Now we can create a separate data frame that splits the original data frame by year:  
+
+`years <- group_by(chicago, year)`  
+
+Finally, we compute summary statistics for each year in the data frame with the `summarize()` function.  
+
+```
+summarize(years, pm25 = mean(pm25, na.rm = TRUE), 
+          o3 = max(o3tmean2, na.rm = TRUE), 
+          no2 = median(no2tmean2, na.rm = TRUE))
+```
+
+    # A tibble: 19 × 4
+        year  pm25    o3   no2
+       <dbl> <dbl> <dbl> <dbl>
+     1  1987 NaN    63.0  23.5
+     2  1988 NaN    61.7  24.5
+     3  1989 NaN    59.7  26.1
+     4  1990 NaN    52.2  22.6
+     5  1991 NaN    63.1  21.4
+     6  1992 NaN    50.8  24.8
+     7  1993 NaN    44.3  25.8
+     8  1994 NaN    52.2  28.5
+     9  1995 NaN    66.6  27.3
+    10  1996 NaN    58.4  26.4
+    11  1997 NaN    56.5  25.5
+    12  1998  18.3  50.7  24.6
+    13  1999  18.5  57.5  24.7
+    14  2000  16.9  55.8  23.5
+    15  2001  16.9  51.8  25.1
+    16  2002  15.3  54.9  22.7
+    17  2003  15.2  56.2  24.6
+    18  2004  14.6  44.5  23.4
+    19  2005  16.2  58.8  22.6
+
+`summarize()` returns a data frame with year as the first column, and then the annual summary statistics of pm25, o3, and no2.  
+
+## A more complicated example  
+
+In a slightly more complicated example, we might want to know what are the average levels of ozone (o3) and nitrogen dioxide (no2) within quantiles of pm25. A slicker way to do this would be through a regression model, but we can actually do this quickly with `group_by()` and `summarize()`.  
+
+First, we can create a categorical variable of pm25 divided into quantiles:  
+
+``
+qq <- quantile(chicago$pm25, seq(0, 1, 0.2), na.rm = TRUE)
+chicago <- mutate(chicago, pm25.quint = cut(pm25, qq))
+``
+
+Now we can group the data frame by the pm25.quint variable:  
+
+`quint <- group_by(chicago, pm25.quint)`
+
+Finally, we can compute the mean of o3 and no2 within quantiles of pm25:
+
+``
+summarize(quint, o3 = mean(o3tmean2, na.rm = TRUE), 
+          no2 = mean(no2tmean2, na.rm = TRUE))
+``
+
+    # A tibble: 6 × 3
+      pm25.quint     o3   no2
+      <fct>       <dbl> <dbl>
+    1 (1.7,8.7]    21.7  18.0
+    2 (8.7,12.4]   20.4  22.1
+    3 (12.4,16.7]  20.7  24.4
+    4 (16.7,22.6]  19.9  27.3
+    5 (22.6,61.5]  20.3  29.6
+    6 <NA>         18.8  25.8
+
+From the table, it seems there is not a strong relationship between pm25 and o3, but there appears to be a positive correlation between pm25 and no2.  
+
+More sophisticated statistical modeling can help to provide precise answers to these questions, but a simple application of `dplyr` functions can often get you most of the way there.  
+
+## `%>%`
+The pipeline operator `%>%` is very handy for stringing together multiple `dplyr` functions in a sequence of operations. Some trivial pursuit for you: the `%>%` is called the `magrittr` pipe because it comes from the said-named package. R has recently come out with a native pipe |> that may replace the `magrittr` pipe at some point in the future. Some folks are pretty passionate about using one or the other. I personally prefer the `magrittr` pipe, but to each their own. You can read more about it [here](https://www.r-bloggers.com/2021/05/the-new-r-pipe/).  
+
+Notice above that every time we wanted to apply more than one function, the sequence gets buried in a sequence of nested function calls that is difficult to read, i.e.:
+
+`third(second(first(x)))`  
+
+This nesting is not a natural way to think about a sequence of operations.  
+
+The `%>%` operator allows you to string operations in a left-to-right fashion like I touched on earlier, i.e.:
+
+`first(x) %>% second %>% third`
+
+## Example  
+
+Take the example that we just did in the last section.  
+
+That can be done with the following sequence in a single R expression:  
+
+``````
+chicago %>% 
+  mutate(year = as.POSIXlt(date)$year + 1900) %>%    
+  group_by(year) %>% 
+  summarize(pm25 = mean(pm25, na.rm = TRUE), 
+            o3 = max(o3tmean2, na.rm = TRUE), 
+            no2 = median(no2tmean2, na.rm = TRUE))
+``````
+
+    # A tibble: 19 × 4
+        year  pm25    o3   no2
+       <dbl> <dbl> <dbl> <dbl>
+     1  1987 NaN    63.0  23.5
+     2  1988 NaN    61.7  24.5
+     3  1989 NaN    59.7  26.1
+     4  1990 NaN    52.2  22.6
+     5  1991 NaN    63.1  21.4
+     6  1992 NaN    50.8  24.8
+     7  1993 NaN    44.3  25.8
+     8  1994 NaN    52.2  28.5
+     9  1995 NaN    66.6  27.3
+    10  1996 NaN    58.4  26.4
+    11  1997 NaN    56.5  25.5
+    12  1998  18.3  50.7  24.6
+    13  1999  18.5  57.5  24.7
+    14  2000  16.9  55.8  23.5
+    15  2001  16.9  51.8  25.1
+    16  2002  15.3  54.9  22.7
+    17  2003  15.2  56.2  24.6
+    18  2004  14.6  44.5  23.4
+    19  2005  16.2  58.8  22.6
+
+This way we do not have to create a set of temporary variables along the way or create a massive nested sequence of function calls. The sequence essentially reads as "take the chicago data frame *then* create the `year` column *then* group by `year` *then* generate the `mean`, `max`, and `median` columns for each `year`.   
+
+## Note  
+In the above code, I pass the chicago data frame to the first call to `mutate()`, but then afterwards I do not have to pass the first argument to `group_by()` or `summarize()`.  
+
+Once you travel down the pipeline with `%>%`, the first argument is taken to be the output of the previous element in the pipeline.  
+
+Another example might be computing the average pollutant level by month. This could be useful to see if there are any seasonal trends in the data.  
+
+`````
+mutate(chicago, month = as.POSIXlt(date)$mon + 1) %>% 
+        group_by(month) %>% 
+        summarize(pm25 = mean(pm25, na.rm = TRUE), 
+                  o3 = max(o3tmean2, na.rm = TRUE), 
+                  no2 = median(no2tmean2, na.rm = TRUE))
+`````
+
+    # A tibble: 12 × 4
+       month  pm25    o3   no2
+       <dbl> <dbl> <dbl> <dbl>
+     1     1  17.8  28.2  25.4
+     2     2  20.4  37.4  26.8
+     3     3  17.4  39.0  26.8
+     4     4  13.9  47.9  25.0
+     5     5  14.1  52.8  24.2
+     6     6  15.9  66.6  25.0
+     7     7  16.6  59.5  22.4
+     8     8  16.9  54.0  23.0
+     9     9  15.9  57.5  24.5
+    10    10  14.2  47.1  24.2
+    11    11  15.2  29.5  23.6
+    12    12  17.5  27.7  24.5
+
+Here, we can see that o3 tends to be low in the winter months and high in the summer while no2 is higher in the winter and lower in the summer.  
+
+## slice_*()  
+
+The `slice_sample()` function of the `dplyr` package will allow you to see a sample of random rows in random order.  
+
+The number of rows to show is specified by the `n` argument.
+
+* This can be useful if you do not want to print the entire tibble, but you want to get a greater sense of the values.  
+* This is a good option for data analysis reports, where printing the entire tibble would not be appropriate if the tibble is quite large.  
+
+## Example  
+
+`slice_sample(chicago, n = 10)`  
+
+    # A tibble: 10 × 11
+       city   tmpd dewpoint date        pm25 pm10tme…¹ o3tme…² no2tm…³ pm25d…⁴  year
+       <chr> <dbl>    <dbl> <date>     <dbl>     <dbl>   <dbl>   <dbl>   <dbl> <dbl>
+     1 chic   45.5     40.8 1995-10-28  NA        14      7.06    22.5   NA     1995
+     2 chic   37       36.2 1999-02-08  27.6      29.5    4.43    29.7   11.4   1999
+     3 chic   24       17.5 1988-03-14  NA        27     26.1     15.4   NA     1988
+     4 chic   70       62.6 1987-08-20  NA        49     30.5     26.7   NA     1987
+     5 chic   29       23.1 2005-02-22  22.8      28     11.6     32.1    6.57  2005
+     6 chic   74       64.1 1992-07-26  NA        35     20.3     20.8   NA     1992
+     7 chic   75       64.2 2000-08-28  23.7      37.3   31.3     20.6    7.46  2000
+     8 chic   31       21.9 2001-12-09  19.8      23.2    5.64    26.4    3.58  2001
+     9 chic   28       16.9 1992-11-14  NA        18.7    7.67    21.8   NA     1992
+    10 chic   62       50.4 2001-11-01  15.1      83     25.6     25.2   -1.13  2001
+    # … with 1 more variable: pm25.quint <fct>, and abbreviated variable names
+    #   ¹​pm10tmean2, ²​o3tmean2, ³​no2tmean2, ⁴​pm25detrend
+
+You can also use `slice_head()` or `slice_tail()` to take a look at the top rows or bottom rows of your tibble. Again the number of rows can be specified with the `n` argument.  
+
+This will show the first 5 rows:  
+
+`slice_head(chicago, n = 5)`  
+
+    # A tibble: 5 × 11
+      city   tmpd dewpoint date        pm25 pm10tmean2 o3tme…¹ no2tm…² pm25d…³  year
+      <chr> <dbl>    <dbl> <date>     <dbl>      <dbl>   <dbl>   <dbl>   <dbl> <dbl>
+    1 chic     35     30.1 2005-12-31 15          23.5    2.53    13.2   -1.23  2005
+    2 chic     36     31   2005-12-30 15.1        19.2    3.03    22.8   -1.17  2005
+    3 chic     35     29.4 2005-12-29  7.45       23.5    6.79    20.0   -8.78  2005
+    4 chic     37     34.5 2005-12-28 17.8        27.5    3.26    19.3    1.52  2005
+    5 chic     40     33.6 2005-12-27 23.6        27      4.47    23.5    7.33  2005
+    # … with 1 more variable: pm25.quint <fct>, and abbreviated variable names
+    #   ¹​o3tmean2, ²​no2tmean2, ³​pm25detrend
+
+This will show the last 5 rows:  
+
+`slice_tail(chicago, n = 5)`  
+
+    # A tibble: 5 × 11
+      city   tmpd dewpoint date        pm25 pm10tmean2 o3tme…¹ no2tm…² pm25d…³  year
+      <chr> <dbl>    <dbl> <date>     <dbl>      <dbl>   <dbl>   <dbl>   <dbl> <dbl>
+    1 chic   32       28.9 1987-01-05    NA       NA      4.75    30.3      NA  1987
+    2 chic   29       28.6 1987-01-04    NA       47      4.38    30.4      NA  1987
+    3 chic   33       27.4 1987-01-03    NA       34.2    3.33    23.8      NA  1987
+    4 chic   33       29.9 1987-01-02    NA       NA      3.30    23.2      NA  1987
+    5 chic   31.5     31.5 1987-01-01    NA       34      4.25    20.0      NA  1987
+    # … with 1 more variable: pm25.quint <fct>, and abbreviated variable names
+    #   ¹​o3tmean2, ²​no2tmean2, ³​pm25detrend
+
+# Summary  
+
+The `dplyr` package provides a concise set of operations for managing data frames. With these functions we can do a number of complex operations in just a few lines of code. In particular, we can often conduct the beginnings of an exploratory analysis with the powerful combination of `group_by()` and `summarize()`.  
+
+Once you learn the `dplyr` grammar there are a few additional benefits:  
+
+* `dplyr` can work with other data frame "back ends" such as SQL databases. There is an SQL interface for relational databases via the `DBI` package.  
+* `dplyr` can be integrated with the `data.table` package for large fast tables.  
+
+The `dplyr` package is handy way to both simplify and speed up your data frame management code. It is rare that you get such a combination at the same time!  

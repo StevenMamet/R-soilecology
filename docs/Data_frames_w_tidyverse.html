@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data Frames with the Tidyverse</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/darkly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/tabwid-1.1.2/tabwid.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Soil Science with R</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Git_and_R.html">Git and R</a>
+</li>
+<li>
+  <a href="Read_and_Write.html">Read and Write in R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Data Frames with the Tidyverse</h1>
+
+</div>
+
+
+<p>Here are some good background sources to consult: <a
+href="https://r4ds.had.co.nz/tibbles">R for Data Science</a> <a
+href="https://jhudatascience.org/tidyversecourse/wrangle-data.html#data-wrangling">Tidyverse
+Skills for Data Science</a> <a
+href="http://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf">dplyr
+cheat sheet from RStudio</a></p>
+<div id="acknowledgements" class="section level1">
+<h1>Acknowledgements</h1>
+<p>Material for this page was borrowed and adopted from:</p>
+<p><a
+href="https://rdpeng.github.io/Biostat776/lecture-managing-data-frames-with-the-tidyverse"
+class="uri">https://rdpeng.github.io/Biostat776/lecture-managing-data-frames-with-the-tidyverse</a>
+<a
+href="https://jhudatascience.org/tidyversecourse/get-data.html#tibbles"
+class="uri">https://jhudatascience.org/tidyversecourse/get-data.html#tibbles</a>
+<a
+href="https://www.stephaniehicks.com/jhustatcomputing2022/posts/2022-09-06-managing-data-frames-with-tidyverse/"
+class="uri">https://www.stephaniehicks.com/jhustatcomputing2022/posts/2022-09-06-managing-data-frames-with-tidyverse/</a></p>
+</div>
+<div id="data-frames" class="section level1">
+<h1>Data Frames</h1>
+<p>The data frame (or <code>data.frame</code>) is a key data structure
+in statistics and in <code>R</code>.</p>
+<p>The basic structure of a data frame is that there is one observation
+per row and each column represents a variable, a measure, feature, or
+characteristic of that observation.</p>
+<p><code>R</code> has an internal implementation of data frames that is
+likely the one you will use most often. However, there are packages on
+CRAN that implement data frames via things like relational databases
+that allow you to operate on very, very large data frames (but we will
+not discuss them here).</p>
+<p>Given the importance of managing data frames, it is important that we
+have good tools for dealing with them.</p>
+<p>For example, operations like filtering rows, re-ordering rows, and
+selecting columns, can often be tedious operations in <code>R</code>
+whose syntax is not very intuitive. The <code>dplyr</code> package is
+designed to mitigate a lot of these problems and to provide a highly
+optimized set of routines specifically for dealing with data frames.</p>
+</div>
+<div id="tibbles" class="section level1">
+<h1>Tibbles</h1>
+<p>Another type of data structure that we need to discuss is called the
+tibble! It’s best to think of tibbles as an updated and stylish version
+of the <code>data.frame</code>.</p>
+<p>Tibbles are what <code>tidyverse</code> packages work with most
+seamlessly. Now, that does not mean <code>tidyverse</code> packages
+require tibbles.</p>
+<p>In fact, they still work with data.frames, but the more you work with
+<code>tidyverse</code> and <code>tidyverse</code>-adjacent packages, the
+more you will see the advantages of using tibbles.</p>
+<p>Before we go any further, tibbles are data frames, but they have some
+new bells and whistles to make your life easier.</p>
+<p>How tibbles differ from <code>data.frame</code> There are a number of
+differences between tibbles and data.frames.</p>
+<div id="note" class="section level2">
+<h2>Note</h2>
+<p>To see a full vignette about tibbles and how they differ from
+<code>data.frame</code>, you will want to execute
+<code>vignette("tibble")</code> and read through that vignette.</p>
+<p>To summarize some of the most important points:</p>
+<ul>
+<li>Input type remains unchanged - <code>data.frame</code> is notorious
+for treating strings as factors; this will not happen with
+tibbles.<br />
+</li>
+<li>Variable names remain unchanged - In base R, creating data.frames
+will remove spaces from names, converting them to periods or add “x”
+before numeric column names. Creating tibbles will not change variable
+(column) names.<br />
+</li>
+<li>There are no <code>row.names()</code> for a tibble - Tidy data
+requires that variables be stored in a consistent way, removing the need
+for row names.<br />
+</li>
+<li>Tibbles print first ten rows and columns that fit on one screen -
+Printing a tibble to screen will never print the entire huge data frame
+out. By default, it just shows what fits to your screen.</li>
+</ul>
+</div>
+</div>
+<div id="creating-a-tibble" class="section level1">
+<h1>Creating a tibble</h1>
+<p>The <code>tibble</code> package is part of the <code>tidyverse</code>
+and can thus be loaded in (once installed) using:</p>
+<p><code>library(tidyverse)</code></p>
+<div id="as_tibble" class="section level2">
+<h2>as_tibble()</h2>
+<p>Since many packages use the historical <code>data.frame</code> from
+base <code>R</code>, you will often find yourself in the situation that
+you have a <code>data.frame</code> and want to convert that
+<code>data.frame</code> to a tibble.</p>
+<p>To do so, the <code>as_tibble()</code> function is exactly what you
+are looking for.</p>
+<p>For the example, here we use a dataset (<code>chicago.rds</code>)
+containing air pollution and temperature data for the city of Chicago in
+the U.S.</p>
+<p>The dataset is available in the <a
+href="http://www.biostat.jhsph.edu/~rpeng/leanpub/rprog/chicago_data.zip">here</a>.
+Once unzipped, you can load the data into <code>R</code> using the
+<code>readRDS()</code> function.</p>
+<p><code>library(here)</code></p>
+<p><code>chicago &lt;- readRDS(here("data", "chicago.rds"))</code></p>
+<p>You can see some basic characteristics of the dataset with the
+<code>dim()</code> and <code>str()</code> functions.</p>
+<p><code>dim(chicago)</code></p>
+<pre><code>[1] 6940    8</code></pre>
+<p><code>str(chicago)</code></p>
+<pre><code>&#39;data.frame&#39;:   6940 obs. of  8 variables:
+ $ city      : chr  &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; ...
+ $ tmpd      : num  31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+ $ dptp      : num  31.5 29.9 27.4 28.6 28.9 ...
+ $ date      : Date, format: &quot;1987-01-01&quot; &quot;1987-01-02&quot; ...
+ $ pm25tmean2: num  NA NA NA NA NA NA NA NA NA NA ...
+ $ pm10tmean2: num  34 NA 34.2 47 NA ...
+ $ o3tmean2  : num  4.25 3.3 3.33 4.38 4.75 ...
+ $ no2tmean2 : num  20 23.2 23.8 30.4 30.3 ...</code></pre>
+<p>We see this data structure is a <code>data.frame</code> with 6940
+observations and 8 variables.</p>
+<p>To convert this <code>data.frame</code> to a tibble you would use the
+following:</p>
+<p><code>str(as_tibble(chicago))</code></p>
+<pre><code>tibble [6,940 × 8] (S3: tbl_df/tbl/data.frame)
+ $ city      : chr [1:6940] &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; ...
+ $ tmpd      : num [1:6940] 31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+ $ dptp      : num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+ $ date      : Date[1:6940], format: &quot;1987-01-01&quot; &quot;1987-01-02&quot; ...
+ $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+ $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+ $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+ $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...</code></pre>
+</div>
+<div id="note-1" class="section level2">
+<h2>Note</h2>
+<p>Tibbles, by default, only print the first ten rows to screen.</p>
+<p>If you were to print the <code>data.frame</code> chicago to screen,
+all 6940 rows would be displayed. When working with large data.frames,
+this default behavior can be incredibly frustrating.</p>
+<p>Using tibbles removes this frustration because of the default
+settings for tibble printing.</p>
+<p>Additionally, you will note that the type of the variable is printed
+for each variable in the tibble. This helpful feature is another added
+bonus of tibbles relative to <code>data.frame</code>.</p>
+<div id="want-to-see-more-of-the-tibble" class="section level3">
+<h3>Want to see more of the tibble?</h3>
+<p>If you do want to see more rows from the tibble, there are a few
+options!</p>
+<ol style="list-style-type: decimal">
+<li><p>The <code>View()</code> function in RStudio is incredibly
+helpful. The input to this function is the <code>data.frame</code> or
+tibble you would like to see. Specifically, <code>View(chicago)</code>
+would provide you, the viewer, with a scrollable view (in a new tab) of
+the complete dataset.</p></li>
+<li><p>Use the fact that <code>print()</code> enables you to specify how
+many rows and columns you would like to display. Here, we again display
+the chicago <code>data.frame</code> as a tibble but specify that we
+would only like to see 5 rows. The <code>width = Inf</code> argument
+specifies that we would like to see all the possible columns. Here,
+there are only 8, but for larger datasets, this can be helpful to
+specify.</p></li>
+</ol>
+<p><code>as_tibble(chicago) %&gt;%    print(n = 5, width = Inf)</code></p>
+<pre><code># A tibble: 6,940 × 8
+  city   tmpd  dptp date       pm25tmean2 pm10tmean2 o3tmean2 no2tmean2
+  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;          &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+1 chic   31.5  31.5 1987-01-01         NA       34       4.25      20.0
+2 chic   33    29.9 1987-01-02         NA       NA       3.30      23.2
+3 chic   33    27.4 1987-01-03         NA       34.2     3.33      23.8
+4 chic   29    28.6 1987-01-04         NA       47       4.38      30.4
+5 chic   32    28.9 1987-01-05         NA       NA       4.75      30.3
+# … with 6,935 more rows</code></pre>
+</div>
+</div>
+<div id="tibble" class="section level2">
+<h2>tibble()</h2>
+<p>Alternatively, you can create a tibble on the fly by using
+<code>tibble()</code> and specifying the information you would like
+stored in each column.</p>
+</div>
+<div id="note-2" class="section level2">
+<h2>Note</h2>
+<p>If you provide a single value, this value will be repeated across all
+rows of the tibble. This is referred to as “recycling inputs of length
+1.”</p>
+<p>In the example here, we see that the column <code>c</code> will
+contain the value ‘1’ across all rows.</p>
+<pre><code>tibble(
+  a = 1:5,
+  b = 6:10,
+  c = 1,
+  z = (a + b)^2 + c
+)</code></pre>
+<pre><code># A tibble: 5 × 4
+      a     b     c     z
+  &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     6     1    50
+2     2     7     1    82
+3     3     8     1   122
+4     4     9     1   170
+5     5    10     1   226</code></pre>
+<p>The <code>tibble()</code> function allows you to quickly generate
+tibbles and even allows you to reference columns within the tibble you
+are creating, as seen in column z of the example above.</p>
+</div>
+<div id="note-3" class="section level2">
+<h2>Note</h2>
+<p>Tibbles can have column names that are not allowed in
+<code>data.frame</code>.</p>
+<p>In the example below, we see that to utilize a nontraditional
+variable name, you surround the column name with backticks.</p>
+<p>Note that to refer to such columns in other tidyverse packages, you
+willl continue to use backticks surrounding the variable name.</p>
+<pre><code>tibble(
+  `two words` = 1:5,
+  `12` = &quot;numeric&quot;,
+  `:)` = &quot;smile&quot;,
+)</code></pre>
+<pre><code># A tibble: 5 × 3
+  `two words` `12`    `:)` 
+        &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;
+1           1 numeric smile
+2           2 numeric smile
+3           3 numeric smile
+4           4 numeric smile
+5           5 numeric smile</code></pre>
+</div>
+</div>
+<div id="subsetting-tibbles" class="section level1">
+<h1>Subsetting tibbles</h1>
+<p>Subsetting tibbles also differs slightly from how subsetting occurs
+with <code>data.frame</code>.</p>
+<p>When it comes to tibbles,</p>
+<ul>
+<li><code>[[</code> can subset by name or position<br />
+</li>
+<li><code>$</code> only subsets by name</li>
+</ul>
+<p>For example:</p>
+<pre><code>df &lt;- tibble(
+  a = 1:5,
+  b = 6:10,
+  c = 1,
+  z = (a + b)^2 + c
+)</code></pre>
+<p>Extract by name using <code>$</code> or <code>[[]]</code>
+<code>df$z</code></p>
+<pre><code>[1]  50  82 122 170 226</code></pre>
+<p><code>df[["z"]]</code></p>
+<pre><code>[1]  50  82 122 170 226</code></pre>
+<p>Extract by position requires <code>[[]]</code><br />
+<code>df[[4]]</code></p>
+<pre><code>[1]  50  82 122 170 226</code></pre>
+<p>Having now discussed tibbles, which are the type of object most
+<code>tidyverse</code> and <code>tidyverse</code>-adjacent packages work
+best with, we now know the goal.</p>
+<p>In many cases, tibbles are ultimately what we want to work with in
+<code>R</code>.</p>
+<p>However, data are stored in many different formats outside of
+<code>R</code>. We will spend the rest of this lesson discussing
+wrangling functions that work either a <code>data.frame</code> or
+<code>tibble.</code></p>
+</div>
+<div id="the-dplyr-package" class="section level1">
+<h1>The dplyr Package</h1>
+<p>The <code>dplyr</code> package was developed by Posit (formely
+RStudio) and is an optimized and distilled version of the older
+<code>plyr</code> package for data manipulation or wrangling.</p>
+<p>The <code>dplyr</code> package does not provide any “new”
+functionality to <code>R</code> per se, in the sense that everything
+<code>dplyr</code> does could already be done with base <code>R</code>,
+but it greatly simplifies existing functionality in <code>R</code>.</p>
+<p>One important contribution of the <code>dplyr</code> package is that
+it provides a “grammar” (in particular, verbs) for data manipulation and
+for operating on data frames.</p>
+<p>With this grammar, you can sensibly communicate what it is that you
+are doing to a data frame that other people can understand (assuming
+they also know the grammar). This is useful because it provides an
+abstraction for data manipulation that previously did not exist.</p>
+<p>Another useful contribution is that the <code>dplyr</code> functions
+are very fast, as many key operations are coded in C++. Quickly, C++ is
+a high-level general-purpose programming language created by Danish
+computer scientist Bjarne Stroustrup as an extension of the C
+programming language, or “C with Classes”. Check out the <a
+href="https://en.wikipedia.org/wiki/C%2B%2B">Wikipedia article</a> if
+you’re interested in learning more.</p>
+<div id="dplyr-grammar" class="section level2">
+<h2><code>dplyr</code> grammar</h2>
+<p>Some of the key “verbs” provided by the <code>dplyr</code> package
+are:</p>
+<ul>
+<li><code>select()</code>: returns a subset of the columns of a data
+frame, using a flexible notation</li>
+<li><code>filter()</code>: extracts a subset of rows from a data frame
+based on logical conditions</li>
+<li><code>arrange()</code>: reorders rows of a data frame</li>
+<li><code>rename()</code>: renames variables in a data frame</li>
+<li><code>mutate()</code>: adds new variables/columns or transform
+existing variables</li>
+<li><code>summarise()</code> / <code>summarize()</code>: generate
+summary statistics of different variables in the data frame, possibly
+within strata</li>
+<li><code>%&gt;%</code>: the <code>pipe</code> operator is used to
+connect multiple verb actions together into a pipeline</li>
+</ul>
+</div>
+<div id="note-4" class="section level2">
+<h2>Note</h2>
+<p>The <code>dplyr</code> package as a number of its own data types that
+it takes advantage of.</p>
+<p>For example, there is a handy <code>print()</code> method that
+prevents you from printing a lot of data to the console. Most of the
+time, these additional data types are transparent to the user and do not
+need to be worried about.</p>
+</div>
+<div id="dplyr-functions" class="section level2">
+<h2><code>dplyr</code> functions</h2>
+<p>All of the functions that we will discuss here will have a few common
+characteristics. In particular:</p>
+<ol style="list-style-type: decimal">
+<li>The first argument is a data frame type object.<br />
+</li>
+<li>The subsequent arguments describe what to do with the data frame
+specified in the first argument, and you can refer to columns in the
+data frame directly (without using the <code>$</code> operator, just use
+the column names).<br />
+</li>
+<li>The return result of a function is a new data frame.<br />
+</li>
+<li>Data frames must be properly formatted and annotated for this to all
+be useful. In particular, the data must be <code>tidy.</code> In short,
+there should be one observation per row, and each column should
+represent a feature or characteristic of that observation.</li>
+</ol>
+</div>
+<div id="dplyr-installation" class="section level2">
+<h2>dplyr installation</h2>
+<p>The <code>dplyr</code> package can be installed from CRAN or from
+GitHub using the <code>devtools</code> package and the
+<code>install_github()</code> function. The GitHub repository will
+usually contain the latest updates to the package and the development
+version.</p>
+<p>To install from CRAN, just run:</p>
+<p><code>install.packages("dplyr")</code></p>
+<p>The <code>dplyr</code> package is also installed when you install the
+<code>tidyverse</code> meta-package.</p>
+<p>After installing the package it is important that you load it into
+your R session with the <code>library()</code> function.</p>
+<p><code>library(dplyr)</code></p>
+<p>You may get some warnings when the package is loaded because there
+are functions in the <code>dplyr</code> package that have the same name
+as functions in other packages. For now you can ignore the warnings.</p>
+</div>
+<div id="select" class="section level2">
+<h2>select()</h2>
+<p>We will continue to use the chicago dataset containing air pollution
+and temperature data.</p>
+<p><code>chicago &lt;- as_tibble(chicago) str(chicago)</code></p>
+<pre><code>tibble [6,940 × 8] (S3: tbl_df/tbl/data.frame)
+ $ city      : chr [1:6940] &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; ...
+ $ tmpd      : num [1:6940] 31.5 33 33 29 32 40 34.5 29 26.5 32.5 ...
+ $ dptp      : num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+ $ date      : Date[1:6940], format: &quot;1987-01-01&quot; &quot;1987-01-02&quot; ...
+ $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+ $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+ $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+ $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...</code></pre>
+<p>The <code>select()</code> function can be used to select columns of a
+data frame that you want to focus on.</p>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>Suppose we wanted to take the first 3 columns only. There are a few
+ways to do this.</p>
+<ol style="list-style-type: decimal">
+<li>We could for example use numerical indices:</li>
+</ol>
+<p><code>names(chicago)[1:3]</code></p>
+<pre><code>[1] &quot;city&quot; &quot;tmpd&quot; &quot;dptp&quot;</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>But we can also use the names directly:</li>
+</ol>
+<p><code>subset &lt;- select(chicago, city:dptp) head(subset)</code></p>
+<pre><code># A tibble: 6 × 3
+  city   tmpd  dptp
+  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 chic   31.5  31.5
+2 chic   33    29.9
+3 chic   33    27.4
+4 chic   29    28.6
+5 chic   32    28.9
+6 chic   40    35.1</code></pre>
+</div>
+<div id="note-5" class="section level2">
+<h2>Note</h2>
+<p>The <code>:</code> normally cannot be used with names or strings, but
+inside the <code>select()</code> function you can use it to specify a
+range of variable names.</p>
+<p>You can also omit variables using the <code>select()</code> function
+by using the negative sign. With <code>select()</code> you can do:</p>
+<p><code>select(chicago, -(city:dptp))</code></p>
+<p>Alternatively, here is the same function but using the pipe
+notation:</p>
+<p><code>chicago %&gt;% select(-(city:dptp))</code></p>
+<p>Both indicate we should include every variable except the variables
+<code>city</code> through <code>dptp.</code> The equivalent code in base
+<code>R</code> would be:</p>
+<pre><code>i &lt;- match(&quot;city&quot;, names(chicago))
+j &lt;- match(&quot;dptp&quot;, names(chicago))
+head(chicago[, -(i:j)])</code></pre>
+<p>Not super intuitive, right?</p>
+<p>The <code>select()</code> function also allows a special syntax that
+allows you to specify variable names based on patterns. So, for example,
+if you wanted to keep every variable that ends with a “2”, we could
+do:</p>
+<p><code>subset &lt;- select(chicago, ends_with("2")) str(subset)</code></p>
+<pre><code>tibble [6,940 × 4] (S3: tbl_df/tbl/data.frame)
+ $ pm25tmean2: num [1:6940] NA NA NA NA NA NA NA NA NA NA ...
+ $ pm10tmean2: num [1:6940] 34 NA 34.2 47 NA ...
+ $ o3tmean2  : num [1:6940] 4.25 3.3 3.33 4.38 4.75 ...
+ $ no2tmean2 : num [1:6940] 20 23.2 23.8 30.4 30.3 ...</code></pre>
+<p>Or if we wanted to keep every variable that starts with a “d”, we
+could do:</p>
+<p><code>subset &lt;- select(chicago, starts_with("d")) str(subset)</code></p>
+<pre><code>tibble [6,940 × 2] (S3: tbl_df/tbl/data.frame)
+ $ dptp: num [1:6940] 31.5 29.9 27.4 28.6 28.9 ...
+ $ date: Date[1:6940], format: &quot;1987-01-01&quot; &quot;1987-01-02&quot; ...</code></pre>
+<p>You can also use more general regular expressions if necessary. See
+the help page (<code>?select</code>) for more details.</p>
+</div>
+<div id="filter" class="section level2">
+<h2>filter()</h2>
+<p>The <code>filter()</code> function is used to extract subsets of rows
+from a data frame. This function is similar to the existing
+<code>subset()</code> function in R but is quite a bit faster in my
+experience.</p>
+</div>
+<div id="example-1" class="section level2">
+<h2>Example</h2>
+<p>Suppose we wanted to extract the rows of the chicago data frame where
+the levels of PM2.5 are greater than 30 (which is a reasonably high
+level), we could do:</p>
+<p><code>chic.f &lt;- filter(chicago, pm25tmean2 &gt; 30) str(chic.f)</code></p>
+<pre><code>tibble [194 × 8] (S3: tbl_df/tbl/data.frame)
+ $ city      : chr [1:194] &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; &quot;chic&quot; ...
+ $ tmpd      : num [1:194] 23 28 55 59 57 57 75 61 73 78 ...
+ $ dptp      : num [1:194] 21.9 25.8 51.3 53.7 52 56 65.8 59 60.3 67.1 ...
+ $ date      : Date[1:194], format: &quot;1998-01-17&quot; &quot;1998-01-23&quot; ...
+ $ pm25tmean2: num [1:194] 38.1 34 39.4 35.4 33.3 ...
+ $ pm10tmean2: num [1:194] 32.5 38.7 34 28.5 35 ...
+ $ o3tmean2  : num [1:194] 3.18 1.75 10.79 14.3 20.66 ...
+ $ no2tmean2 : num [1:194] 25.3 29.4 25.3 31.4 26.8 ...</code></pre>
+<p>You can see that there are now only 194 rows in the data frame and
+the distribution of the pm25tmean2 values is.</p>
+<p><code>summary(chic.f$pm25tmean2)</code></p>
+<pre><code>  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 30.05   32.12   35.04   36.63   39.53   61.50 </code></pre>
+<p>We can place an arbitrarily complex logical sequence inside of
+<code>filter()</code>, so we could for example extract the rows where
+PM2.5 is greater than 30 and temperature is greater than 80 degrees
+Fahrenheit.</p>
+<p><code>chic.f &lt;- filter(chicago, pm25tmean2 &gt; 30 &amp; tmpd &gt; 80) select(chic.f, date, tmpd, pm25tmean2)</code></p>
+<pre><code># A tibble: 17 × 3
+   date        tmpd pm25tmean2
+   &lt;date&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+ 1 1998-08-23    81       39.6
+ 2 1998-09-06    81       31.5
+ 3 2001-07-20    82       32.3
+ 4 2001-08-01    84       43.7
+ 5 2001-08-08    85       38.8
+ 6 2001-08-09    84       38.2
+ 7 2002-06-20    82       33  
+ 8 2002-06-23    82       42.5
+ 9 2002-07-08    81       33.1
+10 2002-07-18    82       38.8
+11 2003-06-25    82       33.9
+12 2003-07-04    84       32.9
+13 2005-06-24    86       31.9
+14 2005-06-27    82       51.5
+15 2005-06-28    85       31.2
+16 2005-07-17    84       32.7
+17 2005-08-03    84       37.9</code></pre>
+<p>Now there are only 17 observations where both of those conditions are
+met.</p>
+<p>Other logical operators you should be aware of include:</p>
+<template id="c8bdd344-ce14-4598-b479-3e717c39a820"><style>
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  border-color: transparent;
+  caption-side: top;
+}
+.tabwid-caption-bottom table{
+  caption-side: bottom;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td, .tabwid th {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+.katex-display {
+    margin: 0 0 !important;
+}
+</style><div class="tabwid"><style>.cl-8be753d6{}.cl-8bded4ea{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(255, 255, 255, 1.00);background-color:transparent;}.cl-8be296c0{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-8be2aaa2{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aaac{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aaad{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aaae{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aab6{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aab7{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aab8{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aab9{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aac0{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aac1{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aac2{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aaca{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aacb{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aacc{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aacd{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aad4{width:0.888in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aad5{width:1.907in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-8be2aad6{width:2.074in;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-8be753d6'><thead><tr style="overflow-wrap:break-word;"><th class="cl-8be2aaa2"><p class="cl-8be296c0"><span class="cl-8bded4ea">Operator</span></p></th><th class="cl-8be2aaac"><p class="cl-8be296c0"><span class="cl-8bded4ea">Meaning</span></p></th><th class="cl-8be2aaad"><p class="cl-8be296c0"><span class="cl-8bded4ea">Example</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-8be2aaae"><p class="cl-8be296c0"><span class="cl-8bded4ea">==</span></p></td><td class="cl-8be2aab6"><p class="cl-8be296c0"><span class="cl-8bded4ea">Equals</span></p></td><td class="cl-8be2aab7"><p class="cl-8be296c0"><span class="cl-8bded4ea">city == chic</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aaae"><p class="cl-8be296c0"><span class="cl-8bded4ea">!=</span></p></td><td class="cl-8be2aab6"><p class="cl-8be296c0"><span class="cl-8bded4ea">Is not equal to</span></p></td><td class="cl-8be2aab7"><p class="cl-8be296c0"><span class="cl-8bded4ea">city != chic</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aab8"><p class="cl-8be296c0"><span class="cl-8bded4ea">&gt;</span></p></td><td class="cl-8be2aab9"><p class="cl-8be296c0"><span class="cl-8bded4ea">Greater than</span></p></td><td class="cl-8be2aac0"><p class="cl-8be296c0"><span class="cl-8bded4ea">tmpd &gt; 32.0</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aac1"><p class="cl-8be296c0"><span class="cl-8bded4ea">&gt;=</span></p></td><td class="cl-8be2aac2"><p class="cl-8be296c0"><span class="cl-8bded4ea">Greater than or equal to</span></p></td><td class="cl-8be2aaca"><p class="cl-8be296c0"><span class="cl-8bded4ea">tmpd &gt;= 32.0</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aab8"><p class="cl-8be296c0"><span class="cl-8bded4ea">&lt;</span></p></td><td class="cl-8be2aab9"><p class="cl-8be296c0"><span class="cl-8bded4ea">Less than</span></p></td><td class="cl-8be2aac0"><p class="cl-8be296c0"><span class="cl-8bded4ea">tmpd &lt; 32.0</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aab8"><p class="cl-8be296c0"><span class="cl-8bded4ea">&lt;=</span></p></td><td class="cl-8be2aab9"><p class="cl-8be296c0"><span class="cl-8bded4ea">Less than or equal to</span></p></td><td class="cl-8be2aac0"><p class="cl-8be296c0"><span class="cl-8bded4ea">tmpd &lt;= 32.0</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aacb"><p class="cl-8be296c0"><span class="cl-8bded4ea">%in%</span></p></td><td class="cl-8be2aacc"><p class="cl-8be296c0"><span class="cl-8bded4ea">Included in</span></p></td><td class="cl-8be2aacd"><p class="cl-8be296c0"><span class="cl-8bded4ea">city %in% c('chic', 'bmore')</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-8be2aad4"><p class="cl-8be296c0"><span class="cl-8bded4ea">is.na()</span></p></td><td class="cl-8be2aad5"><p class="cl-8be296c0"><span class="cl-8bded4ea">Is a missing value</span></p></td><td class="cl-8be2aad6"><p class="cl-8be296c0"><span class="cl-8bded4ea">is.na(pm10tmean2)</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="352689f3-01dd-4d94-8b71-78bce6bbc709"></div>
+<script>
+var dest = document.getElementById("352689f3-01dd-4d94-8b71-78bce6bbc709");
+var template = document.getElementById("c8bdd344-ce14-4598-b479-3e717c39a820");
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+</div>
+<div id="note-6" class="section level2">
+<h2>Note</h2>
+<p>If you are ever unsure of how to write a logical statement, but know
+how to write its opposite, you can use the <code>!</code> operator to
+negate the whole statement.</p>
+<p>A common use of this is to identify observations with non-missing
+data (e.g., <code>!(is.na(pm10tmean2))</code>).</p>
+</div>
+<div id="arrange" class="section level2">
+<h2>arrange()</h2>
+<p>The <code>arrange()</code> function is used to reorder rows of a data
+frame according to one of the variables/columns. Reordering rows of a
+data frame (while preserving corresponding order of other columns) is
+normally a pain to do in <code>R</code>. The <code>arrange()</code>
+function simplifies the process quite a bit.</p>
+<p>Here we can order the rows of the data frame by date, so that the
+first row is the earliest (oldest) observation and the last row is the
+latest (most recent) observation.</p>
+<p><code>chicago &lt;- arrange(chicago, date)</code></p>
+<p>We can now check the first few rows:</p>
+<p><code>head(select(chicago, date, pm25tmean2), 3)</code></p>
+<pre><code># A tibble: 3 × 2
+  date       pm25tmean2
+  &lt;date&gt;          &lt;dbl&gt;
+1 1987-01-01         NA
+2 1987-01-02         NA
+3 1987-01-03         NA</code></pre>
+<p>and the last few rows:</p>
+<p><code>tail(select(chicago, date, pm25tmean2), 3)</code></p>
+<pre><code># A tibble: 3 × 2
+  date       pm25tmean2
+  &lt;date&gt;          &lt;dbl&gt;
+1 2005-12-29       7.45
+2 2005-12-30      15.1 
+3 2005-12-31      15   </code></pre>
+<p>Columns can be arranged in descending order too by using the special
+<code>desc()</code> operator:</p>
+<p><code>chicago &lt;- arrange(chicago, desc(date))</code></p>
+<p>Looking at the first three and last three rows shows the dates in
+descending order.</p>
+<p><code>head(select(chicago, date, pm25tmean2), 3)</code></p>
+<pre><code># A tibble: 3 × 2
+  date       pm25tmean2
+  &lt;date&gt;          &lt;dbl&gt;
+1 2005-12-31      15   
+2 2005-12-30      15.1 
+3 2005-12-29       7.45</code></pre>
+<p><code>tail(select(chicago, date, pm25tmean2), 3)</code></p>
+<pre><code># A tibble: 3 × 2
+  date       pm25tmean2
+  &lt;date&gt;          &lt;dbl&gt;
+1 1987-01-03         NA
+2 1987-01-02         NA
+3 1987-01-01         NA</code></pre>
+</div>
+<div id="rename" class="section level2">
+<h2>rename()</h2>
+<p>Renaming a variable in a data frame in R is surprisingly hard to do!
+The <code>rename()</code> function is designed to make this process
+easier.</p>
+<p>Here you can see the names of the first five variables in the chicago
+data frame.</p>
+<p><code>head(chicago[, 1:5], 3)</code></p>
+<pre><code># A tibble: 3 × 5
+  city   tmpd  dptp date       pm25tmean2
+  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;          &lt;dbl&gt;
+1 chic     35  30.1 2005-12-31      15   
+2 chic     36  31   2005-12-30      15.1 
+3 chic     35  29.4 2005-12-29       7.45</code></pre>
+<p>The dptp column is supposed to represent the dew point temperature
+and the pm25tmean2 column provides the PM2.5 data.</p>
+<p>However, these names are pretty obscure or awkward and probably be
+renamed to something more sensible.</p>
+<p><code>chicago &lt;- rename(chicago, dewpoint = dptp, pm25 = pm25tmean2) head(chicago[, 1:5], 3)</code></p>
+<pre><code># A tibble: 3 × 5
+  city   tmpd dewpoint date        pm25
+  &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;
+1 chic     35     30.1 2005-12-31 15   
+2 chic     36     31   2005-12-30 15.1 
+3 chic     35     29.4 2005-12-29  7.45</code></pre>
+<p>The syntax inside the <code>rename()</code> function is to have the
+new name on the left-hand side of the <code>=</code> sign and the old
+name on the right-hand side.</p>
+</div>
+<div id="mutate" class="section level2">
+<h2>mutate()</h2>
+<p>The <code>mutate()</code> function exists to compute transformations
+of variables in a data frame. Often, you want to create new variables
+that are derived from existing variables and <code>mutate()</code>
+provides a clean interface for doing that.</p>
+<p>For example, with air pollution data, we often want to detrend the
+data by subtracting the mean from the data.</p>
+<p>That way we can look at whether a given day’s air pollution level is
+higher than or less than average (as opposed to looking at its absolute
+level).</p>
+<p>Here, we create a pm25detrend variable that subtracts the mean from
+the pm25 variable.</p>
+<p><code>chicago &lt;- mutate(chicago, pm25detrend = pm25 - mean(pm25, na.rm = TRUE)) head(chicago)</code></p>
+<pre><code># A tibble: 6 × 9
+  city   tmpd dewpoint date        pm25 pm10tmean2 o3tmean2 no2tmean2 pm25detr…¹
+  &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+1 chic     35     30.1 2005-12-31 15          23.5     2.53      13.2      -1.23
+2 chic     36     31   2005-12-30 15.1        19.2     3.03      22.8      -1.17
+3 chic     35     29.4 2005-12-29  7.45       23.5     6.79      20.0      -8.78
+4 chic     37     34.5 2005-12-28 17.8        27.5     3.26      19.3       1.52
+5 chic     40     33.6 2005-12-27 23.6        27       4.47      23.5       7.33
+6 chic     35     29.6 2005-12-26  8.4         8.5    14.0       16.8      -7.83
+# … with abbreviated variable name ¹​pm25detrend</code></pre>
+<p>There is also the related <code>transmute()</code> function, which
+does the same thing as mutate() but then drops all non-transformed
+variables.</p>
+<p>Here, we de-trend the PM10 and ozone (O3) variables.</p>
+<pre><code>head(transmute(chicago, 
+               pm10detrend = pm10tmean2 - mean(pm10tmean2, na.rm = TRUE),
+               o3detrend = o3tmean2 - mean(o3tmean2, na.rm = TRUE)))</code></pre>
+<pre><code># A tibble: 6 × 2
+  pm10detrend o3detrend
+        &lt;dbl&gt;     &lt;dbl&gt;
+1      -10.4     -16.9 
+2      -14.7     -16.4 
+3      -10.4     -12.6 
+4       -6.40    -16.2 
+5       -6.90    -15.0 
+6      -25.4      -5.39</code></pre>
+<p>Note that there are only two columns in the transmuted data
+frame.</p>
+</div>
+<div id="group_by" class="section level2">
+<h2>group_by()</h2>
+<p>The <code>group_by()</code> function is used to generate summary
+statistics from the data frame within strata defined by a variable.</p>
+<p>For example, in this air pollution dataset, you might want to know
+what the average annual level of PM2.5 is?</p>
+<p>So the stratum is the year, and that is something we can derive from
+the date variable.</p>
+<p>In conjunction with the <code>group_by()</code> function, we often
+use the <code>summarize()</code> function (or <code>summarise()</code>
+for some parts of the world).</p>
+</div>
+<div id="note-7" class="section level2">
+<h2>Note</h2>
+<p>The general operation here is a combination of:</p>
+<ol style="list-style-type: decimal">
+<li>Splitting a data frame into separate pieces defined by a variable or
+group of variables (<code>group_by()</code>).</li>
+<li>Then, applying a summary function across those subsets
+(<code>summarize()</code>)</li>
+</ol>
+</div>
+<div id="example-2" class="section level2">
+<h2>Example</h2>
+<p>First, we can create a year variable using
+<code>as.POSIXlt()</code>:</p>
+<p><code>chicago &lt;- mutate(chicago, year = as.POSIXlt(date)$year + 1900)</code></p>
+<p>Now we can create a separate data frame that splits the original data
+frame by year:</p>
+<p><code>years &lt;- group_by(chicago, year)</code></p>
+<p>Finally, we compute summary statistics for each year in the data
+frame with the <code>summarize()</code> function.</p>
+<pre><code>summarize(years, pm25 = mean(pm25, na.rm = TRUE), 
+          o3 = max(o3tmean2, na.rm = TRUE), 
+          no2 = median(no2tmean2, na.rm = TRUE))</code></pre>
+<pre><code># A tibble: 19 × 4
+    year  pm25    o3   no2
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1  1987 NaN    63.0  23.5
+ 2  1988 NaN    61.7  24.5
+ 3  1989 NaN    59.7  26.1
+ 4  1990 NaN    52.2  22.6
+ 5  1991 NaN    63.1  21.4
+ 6  1992 NaN    50.8  24.8
+ 7  1993 NaN    44.3  25.8
+ 8  1994 NaN    52.2  28.5
+ 9  1995 NaN    66.6  27.3
+10  1996 NaN    58.4  26.4
+11  1997 NaN    56.5  25.5
+12  1998  18.3  50.7  24.6
+13  1999  18.5  57.5  24.7
+14  2000  16.9  55.8  23.5
+15  2001  16.9  51.8  25.1
+16  2002  15.3  54.9  22.7
+17  2003  15.2  56.2  24.6
+18  2004  14.6  44.5  23.4
+19  2005  16.2  58.8  22.6</code></pre>
+<p><code>summarize()</code> returns a data frame with year as the first
+column, and then the annual summary statistics of pm25, o3, and no2.</p>
+</div>
+<div id="a-more-complicated-example" class="section level2">
+<h2>A more complicated example</h2>
+<p>In a slightly more complicated example, we might want to know what
+are the average levels of ozone (o3) and nitrogen dioxide (no2) within
+quantiles of pm25. A slicker way to do this would be through a
+regression model, but we can actually do this quickly with
+<code>group_by()</code> and <code>summarize()</code>.</p>
+<p>First, we can create a categorical variable of pm25 divided into
+quantiles:</p>
+<p><code>qq &lt;- quantile(chicago$pm25, seq(0, 1, 0.2), na.rm = TRUE) chicago &lt;- mutate(chicago, pm25.quint = cut(pm25, qq))</code></p>
+<p>Now we can group the data frame by the pm25.quint variable:</p>
+<p><code>quint &lt;- group_by(chicago, pm25.quint)</code></p>
+<p>Finally, we can compute the mean of o3 and no2 within quantiles of
+pm25:</p>
+<p><code>summarize(quint, o3 = mean(o3tmean2, na.rm = TRUE),            no2 = mean(no2tmean2, na.rm = TRUE))</code></p>
+<pre><code># A tibble: 6 × 3
+  pm25.quint     o3   no2
+  &lt;fct&gt;       &lt;dbl&gt; &lt;dbl&gt;
+1 (1.7,8.7]    21.7  18.0
+2 (8.7,12.4]   20.4  22.1
+3 (12.4,16.7]  20.7  24.4
+4 (16.7,22.6]  19.9  27.3
+5 (22.6,61.5]  20.3  29.6
+6 &lt;NA&gt;         18.8  25.8</code></pre>
+<p>From the table, it seems there is not a strong relationship between
+pm25 and o3, but there appears to be a positive correlation between pm25
+and no2.</p>
+<p>More sophisticated statistical modeling can help to provide precise
+answers to these questions, but a simple application of
+<code>dplyr</code> functions can often get you most of the way
+there.</p>
+</div>
+<div id="section" class="section level2">
+<h2><code>%&gt;%</code></h2>
+<p>The pipeline operator <code>%&gt;%</code> is very handy for stringing
+together multiple <code>dplyr</code> functions in a sequence of
+operations. Some trivial pursuit for you: the <code>%&gt;%</code> is
+called the <code>magrittr</code> pipe because it comes from the
+said-named package. R has recently come out with a native pipe |&gt;
+that may replace the <code>magrittr</code> pipe at some point in the
+future. Some folks are pretty passionate about using one or the other. I
+personally prefer the <code>magrittr</code> pipe, but to each their own.
+You can read more about it <a
+href="https://www.r-bloggers.com/2021/05/the-new-r-pipe/">here</a>.</p>
+<p>Notice above that every time we wanted to apply more than one
+function, the sequence gets buried in a sequence of nested function
+calls that is difficult to read, i.e.:</p>
+<p><code>third(second(first(x)))</code></p>
+<p>This nesting is not a natural way to think about a sequence of
+operations.</p>
+<p>The <code>%&gt;%</code> operator allows you to string operations in a
+left-to-right fashion like I touched on earlier, i.e.:</p>
+<p><code>first(x) %&gt;% second %&gt;% third</code></p>
+</div>
+<div id="example-3" class="section level2">
+<h2>Example</h2>
+<p>Take the example that we just did in the last section.</p>
+<p>That can be done with the following sequence in a single R
+expression:</p>
+<pre><code>chicago %&gt;% 
+  mutate(year = as.POSIXlt(date)$year + 1900) %&gt;%    
+  group_by(year) %&gt;% 
+  summarize(pm25 = mean(pm25, na.rm = TRUE), 
+            o3 = max(o3tmean2, na.rm = TRUE), 
+            no2 = median(no2tmean2, na.rm = TRUE))</code></pre>
+<pre><code># A tibble: 19 × 4
+    year  pm25    o3   no2
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1  1987 NaN    63.0  23.5
+ 2  1988 NaN    61.7  24.5
+ 3  1989 NaN    59.7  26.1
+ 4  1990 NaN    52.2  22.6
+ 5  1991 NaN    63.1  21.4
+ 6  1992 NaN    50.8  24.8
+ 7  1993 NaN    44.3  25.8
+ 8  1994 NaN    52.2  28.5
+ 9  1995 NaN    66.6  27.3
+10  1996 NaN    58.4  26.4
+11  1997 NaN    56.5  25.5
+12  1998  18.3  50.7  24.6
+13  1999  18.5  57.5  24.7
+14  2000  16.9  55.8  23.5
+15  2001  16.9  51.8  25.1
+16  2002  15.3  54.9  22.7
+17  2003  15.2  56.2  24.6
+18  2004  14.6  44.5  23.4
+19  2005  16.2  58.8  22.6</code></pre>
+<p>This way we do not have to create a set of temporary variables along
+the way or create a massive nested sequence of function calls. The
+sequence essentially reads as “take the chicago data frame <em>then</em>
+create the <code>year</code> column <em>then</em> group by
+<code>year</code> <em>then</em> generate the <code>mean</code>,
+<code>max</code>, and <code>median</code> columns for each
+<code>year</code>.</p>
+</div>
+<div id="note-8" class="section level2">
+<h2>Note</h2>
+<p>In the above code, I pass the chicago data frame to the first call to
+<code>mutate()</code>, but then afterwards I do not have to pass the
+first argument to <code>group_by()</code> or
+<code>summarize()</code>.</p>
+<p>Once you travel down the pipeline with <code>%&gt;%</code>, the first
+argument is taken to be the output of the previous element in the
+pipeline.</p>
+<p>Another example might be computing the average pollutant level by
+month. This could be useful to see if there are any seasonal trends in
+the data.</p>
+<pre><code>mutate(chicago, month = as.POSIXlt(date)$mon + 1) %&gt;% 
+        group_by(month) %&gt;% 
+        summarize(pm25 = mean(pm25, na.rm = TRUE), 
+                  o3 = max(o3tmean2, na.rm = TRUE), 
+                  no2 = median(no2tmean2, na.rm = TRUE))</code></pre>
+<pre><code># A tibble: 12 × 4
+   month  pm25    o3   no2
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1     1  17.8  28.2  25.4
+ 2     2  20.4  37.4  26.8
+ 3     3  17.4  39.0  26.8
+ 4     4  13.9  47.9  25.0
+ 5     5  14.1  52.8  24.2
+ 6     6  15.9  66.6  25.0
+ 7     7  16.6  59.5  22.4
+ 8     8  16.9  54.0  23.0
+ 9     9  15.9  57.5  24.5
+10    10  14.2  47.1  24.2
+11    11  15.2  29.5  23.6
+12    12  17.5  27.7  24.5</code></pre>
+<p>Here, we can see that o3 tends to be low in the winter months and
+high in the summer while no2 is higher in the winter and lower in the
+summer.</p>
+</div>
+<div id="slice_" class="section level2">
+<h2>slice_*()</h2>
+<p>The <code>slice_sample()</code> function of the <code>dplyr</code>
+package will allow you to see a sample of random rows in random
+order.</p>
+<p>The number of rows to show is specified by the <code>n</code>
+argument.</p>
+<ul>
+<li>This can be useful if you do not want to print the entire tibble,
+but you want to get a greater sense of the values.<br />
+</li>
+<li>This is a good option for data analysis reports, where printing the
+entire tibble would not be appropriate if the tibble is quite
+large.</li>
+</ul>
+</div>
+<div id="example-4" class="section level2">
+<h2>Example</h2>
+<p><code>slice_sample(chicago, n = 10)</code></p>
+<pre><code># A tibble: 10 × 11
+   city   tmpd dewpoint date        pm25 pm10tme…¹ o3tme…² no2tm…³ pm25d…⁴  year
+   &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+ 1 chic   45.5     40.8 1995-10-28  NA        14      7.06    22.5   NA     1995
+ 2 chic   37       36.2 1999-02-08  27.6      29.5    4.43    29.7   11.4   1999
+ 3 chic   24       17.5 1988-03-14  NA        27     26.1     15.4   NA     1988
+ 4 chic   70       62.6 1987-08-20  NA        49     30.5     26.7   NA     1987
+ 5 chic   29       23.1 2005-02-22  22.8      28     11.6     32.1    6.57  2005
+ 6 chic   74       64.1 1992-07-26  NA        35     20.3     20.8   NA     1992
+ 7 chic   75       64.2 2000-08-28  23.7      37.3   31.3     20.6    7.46  2000
+ 8 chic   31       21.9 2001-12-09  19.8      23.2    5.64    26.4    3.58  2001
+ 9 chic   28       16.9 1992-11-14  NA        18.7    7.67    21.8   NA     1992
+10 chic   62       50.4 2001-11-01  15.1      83     25.6     25.2   -1.13  2001
+# … with 1 more variable: pm25.quint &lt;fct&gt;, and abbreviated variable names
+#   ¹​pm10tmean2, ²​o3tmean2, ³​no2tmean2, ⁴​pm25detrend</code></pre>
+<p>You can also use <code>slice_head()</code> or
+<code>slice_tail()</code> to take a look at the top rows or bottom rows
+of your tibble. Again the number of rows can be specified with the
+<code>n</code> argument.</p>
+<p>This will show the first 5 rows:</p>
+<p><code>slice_head(chicago, n = 5)</code></p>
+<pre><code># A tibble: 5 × 11
+  city   tmpd dewpoint date        pm25 pm10tmean2 o3tme…¹ no2tm…² pm25d…³  year
+  &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1 chic     35     30.1 2005-12-31 15          23.5    2.53    13.2   -1.23  2005
+2 chic     36     31   2005-12-30 15.1        19.2    3.03    22.8   -1.17  2005
+3 chic     35     29.4 2005-12-29  7.45       23.5    6.79    20.0   -8.78  2005
+4 chic     37     34.5 2005-12-28 17.8        27.5    3.26    19.3    1.52  2005
+5 chic     40     33.6 2005-12-27 23.6        27      4.47    23.5    7.33  2005
+# … with 1 more variable: pm25.quint &lt;fct&gt;, and abbreviated variable names
+#   ¹​o3tmean2, ²​no2tmean2, ³​pm25detrend</code></pre>
+<p>This will show the last 5 rows:</p>
+<p><code>slice_tail(chicago, n = 5)</code></p>
+<pre><code># A tibble: 5 × 11
+  city   tmpd dewpoint date        pm25 pm10tmean2 o3tme…¹ no2tm…² pm25d…³  year
+  &lt;chr&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1 chic   32       28.9 1987-01-05    NA       NA      4.75    30.3      NA  1987
+2 chic   29       28.6 1987-01-04    NA       47      4.38    30.4      NA  1987
+3 chic   33       27.4 1987-01-03    NA       34.2    3.33    23.8      NA  1987
+4 chic   33       29.9 1987-01-02    NA       NA      3.30    23.2      NA  1987
+5 chic   31.5     31.5 1987-01-01    NA       34      4.25    20.0      NA  1987
+# … with 1 more variable: pm25.quint &lt;fct&gt;, and abbreviated variable names
+#   ¹​o3tmean2, ²​no2tmean2, ³​pm25detrend</code></pre>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>The <code>dplyr</code> package provides a concise set of operations
+for managing data frames. With these functions we can do a number of
+complex operations in just a few lines of code. In particular, we can
+often conduct the beginnings of an exploratory analysis with the
+powerful combination of <code>group_by()</code> and
+<code>summarize()</code>.</p>
+<p>Once you learn the <code>dplyr</code> grammar there are a few
+additional benefits:</p>
+<ul>
+<li><code>dplyr</code> can work with other data frame “back ends” such
+as SQL databases. There is an SQL interface for relational databases via
+the <code>DBI</code> package.<br />
+</li>
+<li><code>dplyr</code> can be integrated with the
+<code>data.table</code> package for large fast tables.</li>
+</ul>
+<p>The <code>dplyr</code> package is handy way to both simplify and
+speed up your data frame management code. It is rare that you get such a
+combination at the same time!</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
